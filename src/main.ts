@@ -8,7 +8,7 @@ async function run(): Promise<void> {
     const ret = await robot.sendMessage();
     core.setOutput('dinding response', ret);
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    core.setFailed((error as Error).message)
   }
 }
 

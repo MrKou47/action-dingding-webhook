@@ -46,27 +46,30 @@ class DingdingRobot {
   }
 
   genMessage() {
-    return {
+    const message = {
       msgtype: "markdown",
       markdown: {
         "title": core.getInput('title'),
         "text": core.getInput('text'),
       }
     }
+    core.setOutput('message send to dingding', message);
+    return message;
   }
 
-  sendMessage() {
+  async sendMessage() {
     const message = this.genMessage();
     const url = this.genUrl();
-    return fetch(url, {
+    const ret = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
       body: JSON.stringify(message)
-    }).then(r => {
-      return r.json();
-    }); 
+    })
+    const json = ret.json();
+    console.log('json', json);
+    core.setOutput('response: ', json);
   }
 }
 

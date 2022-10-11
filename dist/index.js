@@ -49,8 +49,7 @@ function run() {
             core.setOutput('dinding response', ret);
         }
         catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
+            core.setFailed(error.message);
         }
     });
 }
@@ -86,6 +85,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -129,25 +137,30 @@ class DingdingRobot {
         return url.toString();
     }
     genMessage() {
-        return {
+        const message = {
             msgtype: "markdown",
             markdown: {
                 "title": core.getInput('title'),
                 "text": core.getInput('text'),
             }
         };
+        core.setOutput('message send to dingding', message);
+        return message;
     }
     sendMessage() {
-        const message = this.genMessage();
-        const url = this.genUrl();
-        return (0, node_fetch_1.default)(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-            },
-            body: JSON.stringify(message)
-        }).then(r => {
-            return r.json();
+        return __awaiter(this, void 0, void 0, function* () {
+            const message = this.genMessage();
+            const url = this.genUrl();
+            const ret = yield (0, node_fetch_1.default)(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                },
+                body: JSON.stringify(message)
+            });
+            const json = ret.json();
+            console.log('json', json);
+            core.setOutput('response: ', json);
         });
     }
 }
