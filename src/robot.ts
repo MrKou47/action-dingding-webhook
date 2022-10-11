@@ -53,6 +53,7 @@ class DingdingRobot {
     const inputText = core.getInput('text');
     console.log('inputText', inputText);
     const formatText = inputText.replace('\r\n', '\n \n');
+    console.log('formatText', formatText);
     const message = {
       msgtype: "markdown",
       markdown: {
