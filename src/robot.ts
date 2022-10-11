@@ -51,19 +51,25 @@ class DingdingRobot {
 
   genMessage() {
     const inputText = core.getInput('text');
-    console.log('inputText', inputText);
-    const formatText = inputText.replace('\r\n', '\n \n');
-    console.log('formatText', formatText);
     const message = {
       msgtype: "markdown",
       markdown: {
         title: core.getInput('title') || 'Title',
-        text: formatText || 'Content',
+        text: inputText,
       }
     }
     console.log('message send to dingding', message);
-    core.setOutput('message send to dingding', message);
-    return message;
+    const stringified = JSON.stringify(message, (k, v) => {
+      if (k === 'text') {
+        return v
+      };
+      return v;
+    })
+    console.log('stringified', stringified);
+    const formated = this.formatBody(stringified);
+    console.log('formated', formated);
+
+    return formated;
   }
 
   async sendMessage() {
