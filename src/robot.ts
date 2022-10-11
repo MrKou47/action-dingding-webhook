@@ -1,4 +1,5 @@
 import { createHmac } from 'crypto'
+import fetch from 'node-fetch'
 import * as core from '@actions/core'
 
 interface IDingDingResponse {
