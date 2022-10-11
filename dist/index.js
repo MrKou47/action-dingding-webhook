@@ -153,7 +153,7 @@ class DingdingRobot {
         };
         const stringified = JSON.stringify(message, (k, v) => {
             if (k === 'text') {
-                return `## ${title} \r\n ${JSON.parse(v)}`;
+                return `# ${title} \r\n ${JSON.parse(v)}`;
             }
             ;
             return v;
