@@ -151,7 +151,7 @@ class DingdingRobot {
         console.log('message send to dingding', message);
         const stringified = JSON.stringify(message, (k, v) => {
             if (k === 'text') {
-                return v;
+                return JSON.parse(v);
             }
             ;
             return v;
@@ -170,7 +170,7 @@ class DingdingRobot {
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8',
                 },
-                body: JSON.stringify(message)
+                body: message
             });
             const json = yield ret.json();
             console.log('json', json);
