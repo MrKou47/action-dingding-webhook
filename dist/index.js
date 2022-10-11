@@ -114,7 +114,7 @@ class DingdingRobot {
             throw new Error('Missing DINGDING_ACCESS_TOKEN environment variable');
         }
         this.secret = process.env['DINGDING_SECRET'];
-        this.access_token = core.getInput('DINGDING_ACCESS_TOKEN');
+        this.access_token = process.env['DINGDING_ACCESS_TOKEN'];
     }
     genSign() {
         const { secret } = this;
