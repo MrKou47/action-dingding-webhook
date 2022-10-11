@@ -140,11 +140,13 @@ class DingdingRobot {
         return body.replace('\r\n', ' \n \n ');
     }
     genMessage() {
+        const inputText = core.getInput('text');
+        const formatText = inputText.replace('\r\n', '\n \n');
         const message = {
             msgtype: "markdown",
             markdown: {
                 title: core.getInput('title') || 'Title',
-                text: this.formatBody(core.getInput('text') || 'Text'),
+                text: formatText || 'Content',
             }
         };
         console.log('message send to dingding', message);
