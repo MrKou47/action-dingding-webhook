@@ -49,10 +49,11 @@ class DingdingRobot {
     const message = {
       msgtype: "markdown",
       markdown: {
-        "title": core.getInput('title'),
-        "text": core.getInput('text'),
+        "title": core.getInput('title') || '',
+        "text": core.getInput('text') || '',
       }
     }
+    console.log('jmessage send to dingdingson', message);
     core.setOutput('message send to dingding', message);
     return message;
   }
@@ -67,9 +68,10 @@ class DingdingRobot {
       },
       body: JSON.stringify(message)
     })
-    const json = ret.json();
+    const json = await ret.json();
     console.log('json', json);
     core.setOutput('response: ', json);
+    return json;
   }
 }
 
