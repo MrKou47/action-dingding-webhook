@@ -45,15 +45,20 @@ class DingdingRobot {
     return url.toString();
   }
 
+  private formatBody(body: string) {
+    return body.replace('\r\n' , ' \n \n ');
+  }
+
   genMessage() {
+    
     const message = {
       msgtype: "markdown",
       markdown: {
-        "title": core.getInput('title') || '',
-        "text": core.getInput('text') || '',
+        title: core.getInput('title') || 'Title',
+        text: this.formatBody(core.getInput('text') || 'Text'),
       }
     }
-    console.log('jmessage send to dingdingson', message);
+    console.log('message send to dingding', message);
     core.setOutput('message send to dingding', message);
     return message;
   }

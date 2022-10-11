@@ -136,15 +136,18 @@ class DingdingRobot {
         url.searchParams.append('sign', sign);
         return url.toString();
     }
+    formatBody(body) {
+        return body.replace('\r\n', ' \n \n ');
+    }
     genMessage() {
         const message = {
             msgtype: "markdown",
             markdown: {
-                "title": core.getInput('title') || '',
-                "text": core.getInput('text') || '',
+                title: core.getInput('title') || 'Title',
+                text: this.formatBody(core.getInput('text') || 'Text'),
             }
         };
-        console.log('jmessage send to dingdingson', message);
+        console.log('message send to dingding', message);
         core.setOutput('message send to dingding', message);
         return message;
     }
