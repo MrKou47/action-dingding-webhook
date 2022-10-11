@@ -51,6 +51,7 @@ class DingdingRobot {
 
   genMessage() {
     const inputText = core.getInput('text');
+    console.log('inputText', inputText);
     const formatText = inputText.replace('\r\n', '\n \n');
     const message = {
       msgtype: "markdown",
