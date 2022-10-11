@@ -8,6 +8,10 @@ inputs:
   text:
     required: true
     description: 'The message text field.'
+  withTitle:
+    required: false
+    default: true
+    description: 'Inject title to text'
 runs:
   using: 'node16'
   main: 'dist/index.js'

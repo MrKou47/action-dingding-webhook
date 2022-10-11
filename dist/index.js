@@ -107,6 +107,7 @@ class DingdingRobot {
     constructor() {
         this.secret = '';
         this.access_token = '';
+        this.withTitle = false;
         if (!process.env['DINGDING_SECRET']) {
             throw new Error('Missing DINGDING_SECRET environment variable');
         }
@@ -115,6 +116,7 @@ class DingdingRobot {
         }
         this.secret = process.env['DINGDING_SECRET'];
         this.access_token = process.env['DINGDING_ACCESS_TOKEN'];
+        this.withTitle = core.getBooleanInput('withTitle');
     }
     genSign() {
         const { secret } = this;
@@ -140,15 +142,19 @@ class DingdingRobot {
         return body.replace('\r\n', ' \n \n ');
     }
     genMessage() {
-        const inputText = core.getInput('text');
+        const title = core.getInput('title') || 'Title';
+        let text = core.getInput('text');
+        if (this.withTitle) {
+            text = `## ${title} \r\n ${text}`;
+        }
+        console.log('text', text);
         const message = {
             msgtype: "markdown",
             markdown: {
-                title: core.getInput('title') || 'Title',
-                text: inputText,
+                title,
+                text,
             }
         };
-        console.log('message send to dingding', message);
         const stringified = JSON.stringify(message, (k, v) => {
             if (k === 'text') {
                 return JSON.parse(v);
@@ -156,9 +162,7 @@ class DingdingRobot {
             ;
             return v;
         });
-        console.log('stringified', stringified);
         const formated = this.formatBody(stringified);
-        console.log('formated', formated);
         return formated;
     }
     sendMessage() {

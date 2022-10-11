@@ -8,8 +8,9 @@ interface IDingDingResponse {
 }
 
 class DingdingRobot {
-  secret: string = ''
-  access_token: string = ''
+  secret = ''
+  access_token = ''
+  withTitle = false;
 
   constructor() {
     if (!process.env['DINGDING_SECRET']) {
@@ -21,6 +22,7 @@ class DingdingRobot {
 
     this.secret = process.env['DINGDING_SECRET'];
     this.access_token = process.env['DINGDING_ACCESS_TOKEN'];
+    this.withTitle = core.getBooleanInput('withTitle');
   }
 
   private genSign() {
@@ -49,25 +51,32 @@ class DingdingRobot {
     return body.replace('\r\n' , ' \n \n ');
   }
 
+
   genMessage() {
-    const inputText = core.getInput('text');
+    const title = core.getInput('title') || 'Title';
+    let text = core.getInput('text');
+
+    if (this.withTitle) {
+      text = `## ${title} \r\n ${text}`;
+    }
+
+    console.log('text', text);
+
     const message = {
       msgtype: "markdown",
       markdown: {
-        title: core.getInput('title') || 'Title',
-        text: inputText,
+        title,
+        text,
       }
     }
-    console.log('message send to dingding', message);
+
     const stringified = JSON.stringify(message, (k, v) => {
       if (k === 'text') {
         return JSON.parse(v)
       };
       return v;
     })
-    console.log('stringified', stringified);
     const formated = this.formatBody(stringified);
-    console.log('formated', formated);
 
     return formated;
   }
