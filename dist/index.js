@@ -144,10 +144,6 @@ class DingdingRobot {
     genMessage() {
         const title = core.getInput('title') || 'Title';
         let text = core.getInput('text');
-        if (this.withTitle) {
-            text = `## ${title} \r\n ${text}`;
-        }
-        console.log('text', text);
         const message = {
             msgtype: "markdown",
             markdown: {
@@ -157,12 +153,13 @@ class DingdingRobot {
         };
         const stringified = JSON.stringify(message, (k, v) => {
             if (k === 'text') {
-                return JSON.parse(v);
+                return `## ${title} \r\n ${JSON.parse(v)}`;
             }
             ;
             return v;
         });
         const formated = this.formatBody(stringified);
+        console.log('formated', formated);
         return formated;
     }
     sendMessage() {
