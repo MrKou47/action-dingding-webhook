@@ -1,11 +1,13 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Action DingDing webhook'
+description: 'Post a message to dingding with webhook'
+author: 'Mrkou47'
 inputs:
-  milliseconds: # change this
+  title:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'The message title field.'
+  text:
+    required: true
+    description: 'The message text field.'
 runs:
   using: 'node16'
   main: 'dist/index.js'
