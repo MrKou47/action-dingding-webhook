@@ -7,26 +7,37 @@ interface IDingDingResponse {
   errmsg: string;
 }
 
+type ISecretTokenCouple = Record<string, { secret: string, access_token: string }>;
+
 class DingdingRobot {
-  secret = ''
-  access_token = ''
+  secret = '';
+  access_token = '';
+
+  secretTokenCouple: ISecretTokenCouple = {};
   withTitle = false;
+  mode: "single" | "multiple" = "single";
 
   constructor() {
-    if (!process.env['DINGDING_SECRET']) {
-      throw new Error('Missing DINGDING_SECRET environment variable')
-    }
-    if (!process.env['DINGDING_ACCESS_TOKEN']) {
-      throw new Error('Missing DINGDING_ACCESS_TOKEN environment variable')
-    }
-
-    this.secret = process.env['DINGDING_SECRET'];
-    this.access_token = process.env['DINGDING_ACCESS_TOKEN'];
+    const DINGDING_SECRET = process.env['DINGDING_SECRET'] as string; 
+    const DINGDING_ACCESS_TOKEN = process.env['DINGDING_ACCESS_TOKEN'] as string;
+    const DINGDING_SECRET_TOKEN_MAP = process.env['DINGDING_SECRET_TOKEN_MAP'];
     this.withTitle = core.getBooleanInput('withTitle');
+
+    this.secret = DINGDING_SECRET;
+    this.access_token = DINGDING_ACCESS_TOKEN;
+
+    try {
+      if (DINGDING_SECRET_TOKEN_MAP) {
+        this.secretTokenCouple = JSON.parse(DINGDING_SECRET_TOKEN_MAP)
+      }
+      this.mode = "multiple";
+    } catch (error) {
+      console.log(error);
+      throw new Error('Parse DINGDING_SECRET_TOKEN_MAP failed.')
+    }
   }
 
-  private genSign() {
-    const { secret } = this;
+  private genSign(secret: string) {
     const timestamp = `${Date.now()}`;
     const mac = createHmac('sha256', secret);
     mac.update(timestamp + '\n' + secret);
@@ -37,9 +48,8 @@ class DingdingRobot {
     }
   }
 
-  private genUrl() {
-    const { access_token } = this;
-    const { timestamp, sign } = this.genSign();
+  private genUrl(access_token: string, secret: string) {
+    const { timestamp, sign } = this.genSign(secret);
     const url = new URL('https://oapi.dingtalk.com/robot/send');
     url.searchParams.append('access_token', access_token);
     url.searchParams.append('timestamp', `${timestamp}`);
@@ -79,7 +89,31 @@ class DingdingRobot {
 
   async sendMessage() {
     const message = this.genMessage();
-    const url = this.genUrl();
+    const { mode } = this;
+    if (mode === 'multiple') {
+      const ret = await this.batchSendMessage(message);
+      return ret;
+    }
+    return this.sendSingleMessage(message);
+  }
+
+  async sendSingleMessage(message: string) {
+    const url = this.genUrl(this.access_token, this.secret);
+    return this.request(url, message);
+  }
+
+  async batchSendMessage(message: string) {
+    const { secretTokenCouple } = this;
+    const keys = Object.keys(secretTokenCouple);
+    return Promise.all(
+      keys.map((k) => this.request(
+        this.genUrl(secretTokenCouple[k].access_token, secretTokenCouple[k].secret), 
+        message
+      ))
+    )
+  }
+
+  async request(url: string, message: string) {
     const ret = await fetch(url, {
       method: 'POST',
       headers: {
@@ -92,6 +126,7 @@ class DingdingRobot {
     core.setOutput('response: ', json);
     return json;
   }
+
 }
 
 export {
