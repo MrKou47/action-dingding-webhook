@@ -107,19 +107,27 @@ class DingdingRobot {
     constructor() {
         this.secret = '';
         this.access_token = '';
+        this.secretTokenCouple = {};
         this.withTitle = false;
-        if (!process.env['DINGDING_SECRET']) {
-            throw new Error('Missing DINGDING_SECRET environment variable');
-        }
-        if (!process.env['DINGDING_ACCESS_TOKEN']) {
-            throw new Error('Missing DINGDING_ACCESS_TOKEN environment variable');
-        }
-        this.secret = process.env['DINGDING_SECRET'];
-        this.access_token = process.env['DINGDING_ACCESS_TOKEN'];
+        this.mode = "single";
+        const DINGDING_SECRET = process.env['DINGDING_SECRET'];
+        const DINGDING_ACCESS_TOKEN = process.env['DINGDING_ACCESS_TOKEN'];
+        const DINGDING_SECRET_TOKEN_MAP = process.env['DINGDING_SECRET_TOKEN_MAP'];
         this.withTitle = core.getBooleanInput('withTitle');
+        this.secret = DINGDING_SECRET;
+        this.access_token = DINGDING_ACCESS_TOKEN;
+        try {
+            if (DINGDING_SECRET_TOKEN_MAP) {
+                this.secretTokenCouple = JSON.parse(DINGDING_SECRET_TOKEN_MAP);
+            }
+            this.mode = "multiple";
+        }
+        catch (error) {
+            console.log(error);
+            throw new Error('Parse DINGDING_SECRET_TOKEN_MAP failed.');
+        }
     }
-    genSign() {
-        const { secret } = this;
+    genSign(secret) {
         const timestamp = `${Date.now()}`;
         const mac = (0, crypto_1.createHmac)('sha256', secret);
         mac.update(timestamp + '\n' + secret);
@@ -129,9 +137,8 @@ class DingdingRobot {
             sign,
         };
     }
-    genUrl() {
-        const { access_token } = this;
-        const { timestamp, sign } = this.genSign();
+    genUrl(access_token, secret) {
+        const { timestamp, sign } = this.genSign(secret);
         const url = new URL('https://oapi.dingtalk.com/robot/send');
         url.searchParams.append('access_token', access_token);
         url.searchParams.append('timestamp', `${timestamp}`);
@@ -165,7 +172,29 @@ class DingdingRobot {
     sendMessage() {
         return __awaiter(this, void 0, void 0, function* () {
             const message = this.genMessage();
-            const url = this.genUrl();
+            const { mode } = this;
+            if (mode === 'multiple') {
+                const ret = yield this.batchSendMessage(message);
+                return ret;
+            }
+            return this.sendSingleMessage(message);
+        });
+    }
+    sendSingleMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = this.genUrl(this.access_token, this.secret);
+            return this.request(url, message);
+        });
+    }
+    batchSendMessage(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { secretTokenCouple } = this;
+            const keys = Object.keys(secretTokenCouple);
+            return Promise.all(keys.map((k) => this.request(this.genUrl(secretTokenCouple[k].access_token, secretTokenCouple[k].secret), message)));
+        });
+    }
+    request(url, message) {
+        return __awaiter(this, void 0, void 0, function* () {
             const ret = yield (0, node_fetch_1.default)(url, {
                 method: 'POST',
                 headers: {
