@@ -119,8 +119,8 @@ class DingdingRobot {
         try {
             if (DINGDING_SECRET_TOKEN_MAP) {
                 this.secretTokenCouple = JSON.parse(DINGDING_SECRET_TOKEN_MAP);
+                this.mode = "multiple";
             }
-            this.mode = "multiple";
         }
         catch (error) {
             console.log(error);
