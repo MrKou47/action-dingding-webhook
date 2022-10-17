@@ -47,6 +47,7 @@ create `DINGDING_SECRET_TOKEN_MAP` like this:
   env:
     DINGDING_SECRET: ${{ secrets.DINGDING_SECRET }}
     DINGDING_ACCESS_TOKEN: ${{ secrets.DINGDING_ACCESS_TOKEN }}
+    DINGDING_SECRET_TOKEN_MAP: ${{ secrets.DINGDING_SECRET_TOKEN_MAP }}
   with:
     title: Hello
     text: Hello, dingding!
