@@ -177,7 +177,7 @@ class DingdingRobot {
                 const ret = yield this.batchSendMessage(message);
                 return ret;
             }
-            return this.sendSingleMessage(message);
+            return yield this.sendSingleMessage(message);
         });
     }
     sendSingleMessage(message) {
