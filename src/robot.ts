@@ -94,7 +94,7 @@ class DingdingRobot {
       const ret = await this.batchSendMessage(message);
       return ret;
     }
-    return this.sendSingleMessage(message);
+    return await this.sendSingleMessage(message);
   }
 
   async sendSingleMessage(message: string) {
