@@ -39,6 +39,8 @@ create `DINGDING_SECRET_TOKEN_MAP` like this:
 }
 ```
 
+### 3. Use this action in github action.yml
+
 ```yaml
 - name: Dingding Notification
   uses: mrkou47/action-dingding-incoming-webhook@main
